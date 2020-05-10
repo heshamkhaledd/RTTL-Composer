@@ -2,6 +2,11 @@
 % Nokia RTTL Composer: User has to enter his
 % note in a string and the output is a
 % <note_name>.wav file that can be played
+% Kindly, enter your RTTL note in the command
+% window below, the audio file will be
+% generated in the same directory you're in.
+% RTTL Code format
+% <name> : <defaults> : <notes> in order.
 %*********************************************
  
 
@@ -23,9 +28,20 @@ note_name = char(note_name);
 %                  (2) = Octave
 %                  (3) = Tempo
 
-note_defaults = split (extractBetween (noteStr,':',':'),',');
+note_defaults = extractAfter (noteStr,':');
+note_defaults = extractBefore (note_defaults,':');
+note_dfs = split (note_defaults,',');
+note_defaultsCH= char(note_dfs);
+note_defaults = note_dfs;
 for index = 1:length(note_defaults)
-    note_defaults(index) = extractAfter(note_defaults(index),'=');
+    
+    if (note_defaultsCH(index,1) == 'd')
+        note_defaults(1) = extractAfter(note_dfs(index),'=');
+    elseif (note_defaultsCH(index,1) == 'o')
+        note_defaults(2) = extractAfter(note_dfs(index),'=');
+    elseif (note_defaultsCH(index,1) == 'b')
+        note_defaults(3) = extractAfter(note_dfs(index),'=');
+    end
 end
 
 % Getting the entered note and splitting it into
@@ -183,7 +199,9 @@ for index = 1:length(note_fr)
         period = final;
 end
 
+% To make it's amplitude from [-1 ~ 1]
 signal= signal / 2;
 
+% Generating the output at a sampling rate = 8192 %
 audiowrite(note_name,signal,8192);
 msgbox({'Operation Completed';'Check the project directory'});
