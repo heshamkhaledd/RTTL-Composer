@@ -8,7 +8,6 @@
  % Taking the note as input from the user %
 noteStr = input('Enter your RTTL Note: ', 's');
 noteStr = regexprep(noteStr,' +','');
-noteStr
     % ***Some processing on the note string to separate its sections*** %
         % Section 1. Name
         %         2. Defaults (Duration, Octave, Tempo)
@@ -38,7 +37,7 @@ note_char = char(note);
 
 % Checking if a single note has the duration at its start. If yes, do
 % nothing. If no, add the default duration at the first of the note.
-for index = 1:length(note_char)
+for index = 1:length(note)
         element = string(note_char(index,1));
         if ((element >= string ('A') && element <= string ('Z')) || (element >= string ('a') && element <= string ('z')))
         note(index) = strcat(note_defaults(1),note(index));
@@ -54,8 +53,15 @@ note_dur = 0;
 note_tempo = str2double(note_defaults(3));
 note_tempo = 60 / note_tempo;
 
-for index = 1:length(note_char)
+for index = 1:length(note)
         element = str2double(note_char(index,1));
+        if (note_char(index,2) >=('A') && note_char(index,2)<=('Z')) || (note_char(index,2)>=('a') && note_char(index,2)<=('z'))
+            flag = 1;
+        end
+        if (flag == 0)
+            element = strcat(note_char(index,1),note_char(index,2));
+            element = str2double(element);
+        end
         for indexx = 1:strlength(note(index))
             if (note_char(index,indexx) == ('.'))
                 note_dur(index) = 1.5*note_tempo/element;
@@ -63,6 +69,7 @@ for index = 1:length(note_char)
             end
         end
          note_dur(index) = note_tempo/element;
+         flag = 0;
 end
 note_dur = note_dur.';
 note_dur = note_dur * str2double(note_defaults(1));
@@ -70,7 +77,7 @@ note_dur = note_dur * str2double(note_defaults(1));
 % Checking if a single note has the octave at its end. If yes, do
 % nothing. If no, add the default octave at the last of the note.
 note_char = char(note);
-for index = 1:length(note_char)
+for index = 1:length(note)
         element = string(note_char(index,strlength(note(index))));
         if ((element >= string ('A') && element <= string ('Z')) || (element >= string ('a') && element <= string ('z')) || element == string('#') || element == string('.'))
         note(index) = strcat(note(index),note_defaults(2));
@@ -82,7 +89,7 @@ note_char = char(note);
 % of each note, so, we'll iterate on each note to extract the letter.
 Idix = 1;
 note_fr = string('0');
-for index = 1:length(note_char)
+for index = 1:length(note)
     for indexx = 1:strlength(note(index))
         element = string(note_char(index,indexx));
         if ((element >= string ('A') && element <= string ('Z')) || (element >= string ('a') && element <= string ('z')))
@@ -171,10 +178,9 @@ signal = 0;
 max_dur = cumsum(note_dur);
 t=(0:0.0001:max_dur(end));
 for index = 1:length(note_fr)
-    
         final = final + note_dur(index);
         signal = signal + (sin(2*pi*(note_fr(index))*(t-period)).*((heaviside(t-period)-heaviside(t-final))));
-        period = final - note_dur(index);
+        period = final;
 end
 
 signal= signal / 2;
