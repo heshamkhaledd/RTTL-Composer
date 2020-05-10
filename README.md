@@ -1,12 +1,12 @@
 # RTTL-Composer
 
 ### Recreating Nokia's RTTL (Ring Tone Transfer Language) composer that takes from the user
-### musical notes writted in RTTL codes and generates an audio file playing them.
+### musical notes written in RTTL codes and generates an audio file playing them.
 
 
 ## Routine
 
-The user enteres a string of musical notes, this string is then taken and gets processed to extract
+The user enteres a string of musical notes, this string is processed to extract
 the required information from it. Each note carries three important pieces of info.
 1. Duration
 2. Octave
@@ -26,4 +26,4 @@ Some websites that has RTTL codes for testing.
 1. I made the project on Matlab 2016 version so, any latter version would do.
 Click "Run" in the Editor's tab.
 2. Enter your RTTL code in the command window (You can find them in the links above)
-3. <note_name>.wav will be generated in the same directory of the project
+3. <note_name>.wav will be generated in the same directory of the project.
