@@ -6,8 +6,9 @@
  
 
  % Taking the note as input from the user %
-noteStr = input('Enter your RTTTL Note: ', 's');
-
+noteStr = input('Enter your RTTL Note: ', 's');
+noteStr = regexprep(noteStr,' +','');
+noteStr
     % ***Some processing on the note string to separate its sections*** %
         % Section 1. Name
         %         2. Defaults (Duration, Octave, Tempo)
@@ -16,14 +17,14 @@ noteStr = input('Enter your RTTTL Note: ', 's');
         
 % Getting note name %
 note_name = extractBefore (noteStr,':'); 
-
+note_name = strcat (note_name,'.wav');
+note_name = char(note_name);
 % Getting note default values and storing them in an array of strings
 % note_defaults -> (1) = Duration
 %                  (2) = Octave
 %                  (3) = Tempo
 
-dfs = extractBetween (noteStr,':',':');
-note_defaults = split (dfs,',');
+note_defaults = split (extractBetween (noteStr,':',':'),',');
 for index = 1:length(note_defaults)
     note_defaults(index) = extractAfter(note_defaults(index),'=');
 end
@@ -43,19 +44,40 @@ for index = 1:length(note_char)
         note(index) = strcat(note_defaults(1),note(index));
         end
 end
+
+% It's required to make an array to store the duration of each note
+% Each note has in real time duration = 60/(Tempo * Duration)
+% If the note has a character '.' in it, then Duration = Duration*1.5
+% All will be stored in an array called note_dur
 note_char = char(note);
+note_dur = 0;
+note_tempo = str2double(note_defaults(3));
+note_tempo = 60 / note_tempo;
+
+for index = 1:length(note_char)
+        element = str2double(note_char(index,1));
+        for indexx = 1:strlength(note(index))
+            if (note_char(index,indexx) == ('.'))
+                note_dur(index) = 1.5*note_tempo/element;
+                break;
+            end
+        end
+         note_dur(index) = note_tempo/element;
+end
+note_dur = note_dur.';
+note_dur = note_dur * str2double(note_defaults(1));
 
 % Checking if a single note has the octave at its end. If yes, do
 % nothing. If no, add the default octave at the last of the note.
+note_char = char(note);
 for index = 1:length(note_char)
-        last=strlength(note(index));
-        element = string(note_char(index,last));
+        element = string(note_char(index,strlength(note(index))));
         if ((element >= string ('A') && element <= string ('Z')) || (element >= string ('a') && element <= string ('z')) || element == string('#') || element == string('.'))
         note(index) = strcat(note(index),note_defaults(2));
         end
 end
-note_char = char(note);
 
+note_char = char(note);
 % It's required to to get each note letter to determine the frequency
 % of each note, so, we'll iterate on each note to extract the letter.
 Idix = 1;
@@ -93,9 +115,9 @@ note_o = str2double(note_o);
 %
 %  $$$$$$$$$  Octave = 4 $     
 %  $$$$$$$$$$$$$$$$$$$$$$$      We will need only values at Octave = 4
-% 1.   A   $  220 Hz     $      Octave (5)= 2 * Octave (4) 
-% 2.   A#  $  233.082 Hz $      Octave (6)= 4 * Octave (4)
-% 3.   B   $  246.942 Hz $      Octave (7)= 8*  Octave (4)
+% 1.   A   $  220 Hz     $      Freq)Octave (5)= 2 * Freq)Octave (4) 
+% 2.   A#  $  233.082 Hz $      Freq)Octave (6)= 4 * Freq)Octave (4)
+% 3.   B   $  246.942 Hz $      Freq)Octave (7)= 8 * Freq)Octave (4)
 % 4.   C   $  261.626 Hz $      So, we can substitute with    
 % 5.   C#  $  277.183 Hz $      Frequency = Base * 2^(Octave - 4)
 % 6.   D   $  293.665 Hz $
@@ -139,3 +161,23 @@ for index = 1:length(note_fr)
     end
 end
 note_fr=str2double(note_fr);
+
+% It's required to sum all of the notes in a one signal to be able to
+% generate the .wav file, so we'll take each note and multiply it in a rect
+% function with the same duration of it. then add them all up respectively.
+period = 0;
+final = 0;
+signal = 0;
+max_dur = cumsum(note_dur);
+t=(0:0.0001:max_dur(end));
+for index = 1:length(note_fr)
+    
+        final = final + note_dur(index);
+        signal = signal + (sin(2*pi*(note_fr(index))*(t-period)).*((heaviside(t-period)-heaviside(t-final))));
+        period = final - note_dur(index);
+end
+
+signal= signal / 2;
+
+audiowrite(note_name,signal,8192);
+msgbox({'Operation Completed';'Check the project directory'});
