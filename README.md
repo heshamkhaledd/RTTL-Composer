@@ -16,7 +16,7 @@ Once those three are processed and extracted from each note. They're used to cal
 and frequency of each single note. Using the frequency and irl duration, we can construct the required signal.
 All note's signals is then added with each other to generate one final signal carrying the audio we want.
 
-Some websites that has RTTL codes for testing.
+Some websites that have RTTL codes for testing.
 1. [fodor](http://www.fodor.sk/Spectrum/rttl.htm)
 2. [picaxe](http://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/)
 
