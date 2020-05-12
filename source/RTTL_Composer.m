@@ -11,7 +11,13 @@
  
 
  % Taking the note as input from the user %
-noteStr = input('Enter your RTTL Note: ', 's');
+prompt = {'Enter your note:'};
+dlgtitle = 'RTTL Composer';
+dims = [5 100];
+definput = {''};
+answer = inputdlg(prompt,dlgtitle,dims,definput); 
+ 
+noteStr = string(answer(1));
 noteStr = regexprep(noteStr,' +','');
     % ***Some processing on the note string to separate its sections*** %
         % Section 1. Name
